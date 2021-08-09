@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+const fs = require('fs');
 const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
@@ -13,6 +13,8 @@ const methodOverride = require("method-override");
 const studentRoute = require("./router/StudentRoute.js");
 const adminRoute = require("./router/AdminRoute.js");
 const applicationRunning = require("./router/api.js");
+
+// const uploads=require("./")
 
 require("dotenv").config();
 
@@ -28,10 +30,13 @@ app.use(express.json());
 
 const uri = process.env.ATLAS_URI;
 
+// const uri1=process.env.ATLAS_URI1;
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
+
+
 
 const connection = mongoose.connection;
 
@@ -129,7 +134,10 @@ app.get("/files/:filename", (req, res) => {
       });
     }
     // File exists
-    return res.json(file);
+    
+    // var data =fs.readFileSync(file);
+    const readstream = gfs.createReadStream(file.filename);
+      readstream.pipe(res);
   });
 });
 
@@ -145,6 +153,12 @@ app.get("/image/:filename", (req, res) => {
     }
 
     // Check if image
+
+//     res.contentType(file.contentType);
+
+// res.send(file.data);
+
+
     if (file.contentType === "image/jpeg" || file.contentType === "image/png") {
       // Read output to browser
       const readstream = gfs.createReadStream(file.filename);
@@ -168,6 +182,21 @@ app.delete("/files/:id", (req, res) => {
     res.redirect("/");
   });
 });
+
+
+// app.get('/images/:filename', function (req, res) {
+
+//   gfs.file.findOne({filename:req.params.filename}, function (err, image) {
+  
+//   if (err) return next(err);
+  
+//   res.contentType(image.contentType);
+  
+//   res.send(image.data);
+  
+//   });
+  
+//   });
 
 app.listen(7000, function () {
   console.log("Server started on port 7000");
