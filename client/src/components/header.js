@@ -1,35 +1,3 @@
-// import React from "react";
-// import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
-
-// function Header() {
-//   return (
-//     <header className="header">
-//       <Navbar variant="dark">
-//         <Navbar.Brand href="/">
-//           <h1>StudyResQ</h1>
-//         </Navbar.Brand>
-//         <Nav className="ml-auto">
-//           <Nav.Link href="/home">Home</Nav.Link>
-//           <Nav.Link href="/about">About</Nav.Link>
-//           <Nav.Link href="/contact">Contact</Nav.Link>
-//           <Nav.Link href="/">Log Out</Nav.Link>
-//         </Nav>
-//       </Navbar>
-//       <Form className="d-flex">
-//         <FormControl
-//           type="search"
-//           placeholder="Search"
-//           className="mr-2"
-//           aria-label="Search"
-//         />
-//         <Button variant="outline-success">Search</Button>
-//       </Form>
-//     </header>
-//   );
-// }
-
-// export default Header;
-
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
@@ -85,7 +53,10 @@ export default function Header(props) {
             <SearchIcon />
           </IconButton>
           <Button variant="outlined" size="small">
-            Sign up
+            <Link href="/studentsignin">Sign in</Link>
+          </Button>
+          <Button variant="outlined" size="small">
+            <Link href="/studentsignup">Sign UP</Link>
           </Button>
         </Toolbar>
         <Toolbar

@@ -104,44 +104,50 @@ export default function StudentSigup() {
           position: toast.POSITION.TOP_CENTER,
         });
       } else {
-        if (password.length > 6 && password === confirmPassword) {
-          // setLoading(true);
-          fetch("http://localhost:3001/api/student/signup", {
-            method: "post",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              firstName: firstName,
-              lastName: lastName,
-              email: email,
-              password: password,
-              contactNo: contactNo,
-            }),
-          })
-            .then((res) => res.json())
-            .then((result) => {
-              // setLoading(false);
-              // console.log(result);
-              if (result.message === "Success") {
-                toast.success("Sweet !", {
-                  position: toast.POSITION.TOP_CENTER,
-                  autoClose: 1500,
-                });
-                sleep(2000).then(() => {
-                  history.push("/studentsignin");
-                });
-              } else {
-                toast.error(`${result.message}`, {
-                  position: toast.POSITION.TOP_CENTER,
-                  autoClose: 2000,
-                });
-                sleep(2300).then(() => {
-                  window.location.reload(false);
-                  history.push("/studentsignup");
-                });
-              }
-            });
+        if (password.length <= 6) {
+          toast.error("Password Must Be Greater than 6 length", {
+            position: toast.POSITION.TOP_CENTER,
+          });
+        } else {
+          if (password.length > 6 && password === confirmPassword) {
+            // setLoading(true);
+            fetch("http://localhost:3001/api/student/signup", {
+              method: "post",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password,
+                contactNo: contactNo,
+              }),
+            })
+              .then((res) => res.json())
+              .then((result) => {
+                // setLoading(false);
+                // console.log(result);
+                if (result.message === "Success") {
+                  toast.success("Sweet !", {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 1500,
+                  });
+                  sleep(2000).then(() => {
+                    history.push("/studentsignin");
+                  });
+                } else {
+                  toast.error(`${result.message}`, {
+                    position: toast.POSITION.TOP_CENTER,
+                    autoClose: 2000,
+                  });
+                  sleep(2300).then(() => {
+                    window.location.reload(false);
+                    history.push("/studentsignup");
+                  });
+                }
+              });
+          }
         }
       }
     }

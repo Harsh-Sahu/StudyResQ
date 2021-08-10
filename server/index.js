@@ -169,6 +169,6 @@ app.delete("/files/:id", (req, res) => {
   });
 });
 
-app.listen(7000, function () {
+app.listen(3001, function () {
   console.log("Server started on port 7000");
 });
