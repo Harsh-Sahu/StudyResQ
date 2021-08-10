@@ -10,6 +10,7 @@ import AdminSignup from "./components/Screens/Signup/AdminSignup";
 
 import Footer from "../src/components/footer";
 import Header from "../src/components/header";
+import  HomePage from "../src/components/Screens/HomeScreen/HomePage";
 
 import home from "./components/home";
 import about from "./components/about";
@@ -43,6 +44,7 @@ function App() {
         <Route path="/adminsignin" component={AdminSignin} />
         <Route path="/studentsignup" component={StudentSignup} />
         <Route path="/adminsignup" component={AdminSignup} />
+        <Route path="/homepage"  component={ HomePage}/>
       </Router>
       <Footer />
     </div>
