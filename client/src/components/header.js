@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useContext} from "react";
+// import {NavLink} from "react-router-dom";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -9,6 +10,7 @@ import Typography from "@material-ui/core/Typography";
 import Link from "@material-ui/core/Link";
 import { Nav } from "react-bootstrap";
 
+import {userContext} from "../App";
 const useStyles = makeStyles((theme) => ({
   toolbar: {
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -27,8 +29,78 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Header(props) {
+  const {state, dispatch} = useContext(userContext);
   const classes = useStyles();
   const { sections, title } = props;
+
+  const RenderMenue = () =>{
+    // console.log(state);
+    if(state){
+      return (
+        <>
+        <li className="nav-item active">
+        {/* <NavLink className="nav-link mr-md-2" to="#">Home <span className="sr-only">(current)</span></NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="#">Home</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="#">About</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="#">About</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="#">Contact</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="#">Contact</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="/logout">Logout</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="/logout">Logout</Link>
+          </Button>
+      </li>
+        </>
+      );
+    }else{
+      return(
+        <>
+        <li className="nav-item active">
+        {/* <NavLink className="nav-link mr-md-2" to="/">Home <span className="sr-only">(current)</span></NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="#">Home</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="#">About</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="#">About</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="#">Contact</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="#">Contact</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="/studentsignin">Login</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="/studentsignin">SignIn</Link>
+          </Button>
+      </li>
+      <li className="nav-item">
+        {/* <NavLink className="nav-link mr-md-2" to="/studentsignup">Signup</NavLink> */}
+        <Button variant="outlined" size="small">
+            <Link href="/studentsignup">SignUp</Link>
+          </Button>
+      </li>
+        </>
+      );
+    }
+  }
 
   return (
     <header className="header">
@@ -52,12 +124,13 @@ export default function Header(props) {
           <IconButton>
             <SearchIcon />
           </IconButton>
-          <Button variant="outlined" size="small">
+          {/* <Button variant="outlined" size="small">
             <Link href="/studentsignin">Sign in</Link>
           </Button>
           <Button variant="outlined" size="small">
             <Link href="/studentsignup">Sign UP</Link>
-          </Button>
+          </Button> */}
+          <RenderMenue/> 
         </Toolbar>
         <Toolbar
           component="nav"

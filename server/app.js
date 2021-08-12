@@ -11,8 +11,14 @@ const env = require("dotenv");
 const app = express();
 const port = 3001;
 const hostname = "localhost";
+const cookieParser = require("cookie-parser");
 
+
+
+app.use(cookieParser());
+app.use(exppress.json());
 app.use(cors());
+app.use(require("./router/StudentRoute.js"));
 env.config();
 
 const uri = process.env.ATLAS_URI;
