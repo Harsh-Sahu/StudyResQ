@@ -1,13 +1,16 @@
 const express = require("express");
 const expressAsynchandler = require("express-async-handler");
-
 const bcrypt = require("bcryptjs");
 const Student = require("../model/database/Student");
-
+const jwt = require("jsonwebtoken");
 const studentRoute = express.Router();
+
+
+
 studentRoute.post(
   "/signin",
   expressAsynchandler(async (req, res) => {
+    let token;
     console.log(req.body.email);
     if (!req.body.email) {
       return res.send({ message: "Please Enter email id" });
@@ -23,6 +26,12 @@ studentRoute.post(
       console.log(req.body.email + " signin found in database");
 
       if (bcrypt.compareSync(req.body.password, student.password)) {
+        // generating token for student
+        token = await student.generateAuthToken();
+        res.cookie("jwtoken", token, {
+          expires:new Date(Date.now() + 25892000000),
+          httpOnly:true
+      });
         return res.send({
           firstName: student.firstName,
           lastName: student.lastName,
@@ -45,6 +54,7 @@ studentRoute.post(
     }
   })
 );
+
 
 studentRoute.post(
   "/signup",
@@ -99,5 +109,11 @@ studentRoute.post(
     }
   })
 );
+
+studentRoute.get('/logout',(req, res)=>{
+
+  res.clearCookie('jwtoken', { path : "/"});
+  res.status(200).send("user logout");
+})
 
 module.exports = studentRoute;

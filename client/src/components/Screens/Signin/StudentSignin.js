@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { useContext,React, useState } from "react";
 import { useHistory } from "react-router-dom";
 // import { jwt } from "jsonwebtoken";
 import Avatar from "@material-ui/core/Avatar";
@@ -16,6 +16,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import LoadingScreen from "../LoadingScreen/LoadingScreen";
+
+import {userContext} from "../../../App";
+
 
 toast.configure();
 
@@ -70,6 +73,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function StudentSigin() {
+
+  const {state, dispatch} = useContext(userContext);
+
+
   const [Loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -105,10 +112,12 @@ export default function StudentSigin() {
           //  toast.success("ueuririr");
           // console.log(result);
           if (result.message === "Success") {
+            dispatch({type:"USER", payload:true});
             toast.success("Sweet !", {
               position: toast.POSITION.TOP_CENTER,
               autoClose: 1500,
             });
+            history.push("/");
           } else {
             toast.error(`${result.message}`, {
               position: toast.POSITION.TOP_CENTER,
