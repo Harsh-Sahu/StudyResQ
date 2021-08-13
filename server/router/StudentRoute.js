@@ -1,16 +1,15 @@
 const express = require("express");
 const expressAsynchandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const sendgridTransport = require("nodemailer-sendgrid-transport");
 const bcrypt = require("bcryptjs");
 const Student = require("../model/database/Student");
-const jwt = require("jsonwebtoken");
+const middleware = require("../middleware/middleware");
 const studentRoute = express.Router();
-
-
-
 studentRoute.post(
   "/signin",
   expressAsynchandler(async (req, res) => {
-    let token;
     console.log(req.body.email);
     if (!req.body.email) {
       return res.send({ message: "Please Enter email id" });
@@ -26,17 +25,58 @@ studentRoute.post(
       console.log(req.body.email + " signin found in database");
 
       if (bcrypt.compareSync(req.body.password, student.password)) {
-        // generating token for student
-        token = await student.generateAuthToken();
-        res.cookie("jwtoken", token, {
-          expires:new Date(Date.now() + 25892000000),
-          httpOnly:true
-      });
+
+        if (!student.isAuthenticated) {
+          console.log(req.body.email + " password valid");
+          //GENERATING A 6 DIGIT  OTP
+          var digits = "0123456789";
+          let OTP = "";
+          for (let i = 0; i <6; i++) {
+            OTP += digits[Math.floor(Math.random() * 10)];
+          }
+
+          const transporter = nodemailer.createTransport(
+            sendgridTransport({
+              auth: {
+                api_key: process.env.SEND_GRID,
+              },
+            })
+          );
+
+          transporter.sendMail({
+            to: req.body.email,
+            from: process.env.COMPANY_EMAIL,
+            subject: "VERIFY ONLINE LIBRARY OTP",
+            html: `<h1>Welcome to Online Library...</h1>
+          <i>You are just one step away from verifying your email.</i><br/>
+          Your OTP is:  <h2>${OTP}</h2>. <br/>Just Enter this OTP on the email verification screen`,
+          });
+
+          const updateOtp = await Student.findOneAndUpdate(
+            { _id: student._id },
+            { otp: { otpCode: OTP, timeStamp: Date.now() } },
+            function (err, res) {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(
+                  req.body.email + " OTP updation success with OTP: " + OTP
+                );
+              }
+            }
+          );
+        }
+        const token = jwt.sign({ _id: student._id }, process.env.JWT_SECRET, {
+          expiresIn: "28d",
+        });
         return res.send({
+          _id: student._id,
           firstName: student.firstName,
           lastName: student.lastName,
           email: student.email,
           message: "Success",
+          isAuthenticated: student.isAuthenticated,
+          token: token,
         });
       } else {
         console.log("Invalid Password");
@@ -55,6 +95,15 @@ studentRoute.post(
   })
 );
 
+studentRoute.post("/allstudents", (req, res) => {
+  Student.find({}).exec((err, students) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    }
+    return res.json({ students });
+  });
+});
+
 
 studentRoute.post(
   "/signup",
@@ -69,6 +118,27 @@ studentRoute.post(
         message: "Email Already Registered",
       });
     } else {
+      var digits = "0123456789";
+      let OTP = "";
+      for (let i = 0; i < 6; i++) {
+        OTP += digits[Math.floor(Math.random() * 10)];
+      }
+
+      const transporter = nodemailer.createTransport(
+        sendgridTransport({
+          auth: {
+            api_key: process.env.SEND_GRID,
+          },
+        })
+      );
+
+      transporter.sendMail({
+        to: req.body.email,
+        from: process.env.COMPANY_EMAIL,
+        subject: "VERIFY  OTP",
+        html: `<h1>Welcome to Online Library...</h1>You are just one step away from verifying your email.
+          //       Your OTP is ${OTP}. Just Enter this OTP on the email verification screen`,
+      });
       // var digits = "0123456789";
       // let OTP = "";
       // for (let i = 0; i < 6; i++) {
@@ -87,6 +157,8 @@ studentRoute.post(
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 8),
         contactNo: req.body.contactNo,
+        otp: { otpCode: OTP, timeStamp: Date.now() },
+        isAuthenticated: false,
       });
 
       console.log(user.firstName);
@@ -94,6 +166,7 @@ studentRoute.post(
       console.log(user.lastName);
       console.log(user.password);
       console.log(user.contactNo);
+      console.log(user.otp.OTP);
 
       const creatstudent = await user.save();
 
@@ -110,10 +183,37 @@ studentRoute.post(
   })
 );
 
-studentRoute.get('/logout',(req, res)=>{
+studentRoute.post(
+  "/verifystudent",
+  expressAsynchandler(async (req, res) => {
 
-  res.clearCookie('jwtoken', { path : "/"});
-  res.status(200).send("user logout");
-})
+    console.log(req.body.id);
+    const student = await Student.findById(req.body.id);
+    return res.status(200).send({ isverified:student.isAuthenticated});
+  })
+);
+
+studentRoute.post(
+  "/studentotp",
+  expressAsynchandler(async (req, res) => {
+    console.log(req.body.otp);
+    const student = await Student.findById(req.body.id);
+    if ((req.body.timestamp - student.otp.timeStamp) / (1000 * 60) > 5) {
+      res.status(401).send({ message: "OTP Expired" });
+    } else {
+      if (req.body.otp === student.otp.otpCode) {
+        await Student.findByIdAndUpdate(req.body.id, {
+          isAuthenticated: true,
+        });
+        res.status(200).send({
+          message: "Valid OTP...User Authenticated",
+          token: student.token,
+        });
+      } else {
+        res.status(401).send({ message: "Invalid OTP" });
+      }
+    }
+  })
+);
 
 module.exports = studentRoute;
