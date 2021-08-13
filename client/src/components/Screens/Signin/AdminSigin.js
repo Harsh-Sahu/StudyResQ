@@ -108,10 +108,31 @@ export default function AdminSigin() {
           // console.log(result);
           if (result.message === "Success") {
             
-            toast.success("Sweet !", {
+
+            localStorage.setItem("Admintoken",result.token);
+
+            if (result.isAuthenticated) {
+              toast.success("Sweet !", {
                 position: toast.POSITION.TOP_CENTER,
                 autoClose: 1500,
-            })
+              });
+              sleep(2000).then(() => {
+                history.push("/");
+                window.location.reload(false);
+              });
+            } else {
+              console.log("Admin unauthorised");
+              toast.warning("Please Authorize yourself", {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 2000,
+              });
+              sleep(2300).then(() => {
+                history.push("/adminotp");
+                // window.location.reload(false);
+              });
+            }
+
+            
           } else {
             toast.error(`${result.message}`, {
               position: toast.POSITION.TOP_CENTER,

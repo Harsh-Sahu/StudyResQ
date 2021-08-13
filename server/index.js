@@ -18,6 +18,7 @@ require("dotenv").config();
 
 const app = express();
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride("_method"));
 app.set("view engine", "ejs");
@@ -31,6 +32,7 @@ const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useCreateIndex: true,
 });
 
 const connection = mongoose.connection;
@@ -183,5 +185,5 @@ app.delete("/files/:id", (req, res) => {
 });
 
 app.listen(3001, function () {
-  console.log("Server started on port 3001");
+  console.log("Server started on port 7000");
 });

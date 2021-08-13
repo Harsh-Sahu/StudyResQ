@@ -1,31 +1,32 @@
-import { React, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
 import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
-import LockOpenIcon from "@material-ui/icons/LockOpen";
-// import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
+import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import LoadingScreen from "../LoadingScreen/LoadingScreen";
+require('dotenv').config()
 
+
+const jwt = require("jsonwebtoken");
+// import LoadingScreen from "../LoadingScreen/LoadingScreen";
 toast.configure();
 
 function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
-
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {"© "}
+      {"Copyright © "}
       <Link color="inherit" href="https://material-ui.com/">
         Library
       </Link>{" "}
@@ -56,91 +57,105 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
   },
   avatar: {
-    margin: theme.spacing(3),
+    margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
   form: {
     width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(6),
+    marginTop: theme.spacing(1),
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
 }));
 
-export default function StudentSignin() {
-  const [Loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function StudentOTP() {
+  const classes = useStyles();
+  const [otp, setOtp] = useState("");
+  const [id, setid] = useState("");
   const history = useHistory();
 
-  const classes = useStyles();
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-
-    setLoading(true);
-
-    if (email === "" || password === "") {
-      toast.error("Please fill all fields !", {
-        position: toast.POSITION.TOP_CENTER,
-      });
-      setLoading(false);
-    } else {
-      fetch("http://localhost:3001/api/student/signin", {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    try {
+      setLoading(true);
+    // toast.success("uieuri");
+    // const token=localStorage.getItem("Studenttoken");
+    // toast.success(token);
+    const decoded_token = jwt.verify(
+        localStorage.getItem("Studenttoken"),
+         process.env.REACT_APP_JWT_SECRET
+      );
+      toast.error(decoded_token._id);
+      setid(decoded_token._id);
+    //   toast.success(id);
+      fetch("http://localhost:3001/api/student/verifystudent", {
         method: "post",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email,
-          password: password,
+          id: decoded_token._id,
         }),
       })
         .then((res) => res.json())
         .then((result) => {
-          // setLoading(false);
+          setLoading(false);
+          if (result.isverified) {
+              
+            history.push("/homepage");
+          }
+        });
+    } catch (err) {
+        toast.error("error");
+      setLoading(false);
+    //   history.push("/signin");
+    }
+  }, []);
 
-          //  toast.success("ueuririr");
-          // toast.success(result.message);
-          if (result.message === "Success") {
-            
-            
-             localStorage.setItem("Studenttoken",result.token);
-
-            if (result.isAuthenticated) {
-              toast.success("Sweet !", {
-                position: toast.POSITION.TOP_CENTER,
-                autoClose: 1500,
-              });
-              sleep(2000).then(() => {
-                history.push("/");
-                window.location.reload(false);
-              });
-            } else {
-              console.log("customer unauthorised");
-              toast.warning("Please Authorize yourself", {
-                position: toast.POSITION.TOP_CENTER,
-                autoClose: 2000,
-              });
-              sleep(2300).then(() => {
-                history.push("/studentotp");
-                // window.location.reload(false);
-              });
-            }
-          } else {
-            toast.error(`${result.message}`, {
+  const submitHandler = () => {
+      
+    if (otp === "") {
+      console.log("Please enter otp");
+    } else {
+      fetch("http://localhost:3001/api/student/studentotp", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: "Bearer " + localStorage.getItem("jwt"),
+        },
+        body: JSON.stringify({
+          otp: otp,
+          timestamp: Date.now(),
+          id: id,
+        }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+         
+          if (result.message === "Valid OTP...User Authenticated") {
+            toast.success("Sweet !", {
               position: toast.POSITION.TOP_CENTER,
+              autoClose: 1500,
+            });
+            sleep(2000).then(() => {
+              history.push("/");
+              window.location.reload(false);
+            });
+          } else {
+            toast.warning(result.message, {
+              position: toast.POSITION.TOP_CENTER,
+              autoClose: 2000,
             });
           }
         });
     }
   };
-
   return (
     <>
-      {Loading}
-      {!Loading && (
+      {}
+
+      { (
         <Grid container component="main" className={classes.root}>
           <CssBaseline />
           <Grid item xs={false} sm={4} md={7} className={classes.image} />
@@ -155,55 +170,39 @@ export default function StudentSignin() {
           >
             <div className={classes.paper}>
               <Avatar className={classes.avatar}>
-                <LockOpenIcon />
+                <LockOutlinedIcon />
               </Avatar>
               <Typography component="h1" variant="h5">
-                Student Sign in
+                Student OTP
               </Typography>
-              <form
-                className={classes.form}
-                noValidate
-                onSubmit={submitHandler}
-              >
-                <Grid item xs={12} style={{ marginBottom: "20px" }}>
-                  <TextField
-                    variant="outlined"
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    variant="outlined"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </Grid>
+              <form className={classes.form} noValidate>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="otp"
+                  label="Enter the 6 digit OTP sent to your email id"
+                  name="otp"
+                  autoComplete="otp"
+                  autoFocus
+                  onChange={(e) => {
+                    setOtp(e.target.value);
+                  }}
+                />
                 <Button
-                  type="submit"
                   fullWidth
                   variant="contained"
                   color="primary"
                   className={classes.submit}
+                  onClick={submitHandler}
                 >
-                  Sign In
+                  Submit OTP
                 </Button>
+                {/* <div id="my-signin2"></div> */}
                 <Box mt={3} />
                 <Grid container>
-                  {/* <Grid item xs>
-                    <Link href="forgotpassword" variant="body2">
-                      Forgot password?
-                    </Link>
-                  </Grid> */}
+                  
                   <Grid item>
                     <Link href="/studentsignup" variant="body2">
                       {"Don't have an account? Sign Up"}
