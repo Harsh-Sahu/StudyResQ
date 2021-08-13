@@ -1,6 +1,5 @@
-import { useContext,React, useState } from "react";
+import { React, useState } from "react";
 import { useHistory } from "react-router-dom";
-// import { jwt } from "jsonwebtoken";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -16,9 +15,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 // import LoadingScreen from "../LoadingScreen/LoadingScreen";
-
-import {userContext} from "../../../App";
-
 
 toast.configure();
 
@@ -72,11 +68,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function StudentSigin() {
-
-  const {state, dispatch} = useContext(userContext);
-
-
+export default function StudentSignin() {
   const [Loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -110,14 +102,32 @@ export default function StudentSigin() {
           // setLoading(false);
 
           //  toast.success("ueuririr");
-          // console.log(result);
+          // toast.success(result.message);
           if (result.message === "Success") {
-            dispatch({type:"USER", payload:true});
-            toast.success("Sweet !", {
-              position: toast.POSITION.TOP_CENTER,
-              autoClose: 1500,
-            });
-            history.push("/");
+            
+            
+             localStorage.setItem("Studenttoken",result.token);
+
+            if (result.isAuthenticated) {
+              toast.success("Sweet !", {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 1500,
+              });
+              sleep(2000).then(() => {
+                history.push("/");
+                window.location.reload(false);
+              });
+            } else {
+              console.log("customer unauthorised");
+              toast.warning("Please Authorize yourself", {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 2000,
+              });
+              sleep(2300).then(() => {
+                history.push("/studentotp");
+                // window.location.reload(false);
+              });
+            }
           } else {
             toast.error(`${result.message}`, {
               position: toast.POSITION.TOP_CENTER,
