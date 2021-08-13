@@ -102,6 +102,15 @@ app.post("/upload", upload.single("file"), (req, res) => {
   res.redirect("/");
 });
 
+app.post("/allfiles", (req, res) => {
+  gfs.files.find({}).toArray((err, files) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    }
+    return res.json({ files });
+  });
+});
+
 // @route GET /files
 // @desc  Display all files in JSON
 app.get("/files", (req, res) => {
@@ -114,6 +123,8 @@ app.get("/files", (req, res) => {
     }
 
     // Files exist
+    const readstream = gfs.createReadStream(file.filename);
+    readstream.pipe(res);
     return res.json(files);
   });
 });
@@ -129,7 +140,9 @@ app.get("/files/:filename", (req, res) => {
       });
     }
     // File exists
-    return res.json(file);
+    const readstream = gfs.createReadStream(file.filename);
+    readstream.pipe(res);
+    // return res.json(file);
   });
 });
 
