@@ -1,26 +1,23 @@
-import React, { createContext, useReducer } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 import "./App.css";
-import StudentSigin from "./components/Screens/Signin/StudentSignin";
+import StudentSignin from "./components/Screens/Signin/StudentSignin";
 import AdminSignin from "./components/Screens/Signin/AdminSigin";
 import StudentSignup from "./components/Screens/Signup/StudentSignup";
 import AdminSignup from "./components/Screens/Signup/AdminSignup";
 
+import AdminOTP from "./components/Screens/AdminOTP/AdminOtp";
 import Footer from "../src/components/footer";
 import Header from "../src/components/header";
-import HomePage from "../src/components/Screens/HomeScreen/HomePage";
+import  HomePage from "../src/components/Screens/HomeScreen/HomePage";
 
+import StudentOTP from "./components/Screens/StudentOTP/StudentOTP";
 import home from "./components/home";
 import about from "./components/about";
 import contact from "./components/contact";
 import myshelf from "./components/myshelf";
-
-import { initialState, reducer } from "./reducer/UseReducer";
-
-// crete context
-export const userContext = createContext();
 
 const sections = [
   { title: "Technology", url: "#" },
@@ -36,24 +33,24 @@ const sections = [
 ];
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <div>
-      <userContext.Provider value={{ state, dispatch }}>
-        <Header title="StudyResQ" sections={sections} />
-        <Router>
-          <Route path="/home" exact component={home} />
-          <Route path="/about" exact component={about} />
-          <Route path="/contact" exact component={contact} />
-          <Route path="/myshelf" exact component={myshelf} />
-          <Route path="/homepage" component={HomePage} />
-          <Route path="/studentsignin" component={StudentSigin} />
-          <Route path="/adminsignin" component={AdminSignin} />
-          <Route path="/studentsignup" component={StudentSignup} />
-          <Route path="/adminsignup" component={AdminSignup} />
-        </Router>
-        <Footer />
-      </userContext.Provider>
+      <Header title="StudyResQ" sections={sections} />
+      <Router>
+        <Route path="/home" exact component={home} />
+        <Route path="/about" exact component={about} />
+        <Route path="/contact" exact component={contact} />
+        <Route path="/myshelf" exact component={myshelf} />
+
+        <Route path="/studentsignin" component={StudentSignin} />
+        <Route path="/adminsignin" component={AdminSignin} />
+        <Route path="/studentsignup" component={StudentSignup} />
+        <Route path="/adminsignup" component={AdminSignup} />
+        <Route path="/homepage"  component={ HomePage}/>
+        <Route path="/studentotp" component={StudentOTP}/>
+        <Route path="/adminotp" component={AdminOTP}/>
+      </Router>
+      <Footer />
     </div>
   );
 }
